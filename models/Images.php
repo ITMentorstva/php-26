@@ -37,4 +37,9 @@ class Images extends DB
     {
         return uniqid().".".$extension;
     }
+
+    public function getAllImages(): object
+    {
+        return $this->connection->query("SELECT * FROM images");
+    }
 }

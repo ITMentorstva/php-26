@@ -1,5 +1,10 @@
 <?php
 
+if(session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+
 require_once "models/Images.php";
 
 $image = new Images();
@@ -10,7 +15,7 @@ foreach($_FILES['profileImage']['name'] as $key => $file)
     $imageSize = $_FILES['profileImage']['size'][$key];
 
     if(!$image->isValidSize($imageSize)) {
-        echo "Slika je prevelika!";
+        $_SESSION['imageErrors'][] = "Slika je prevelika!";
         continue;
     }
 
@@ -18,7 +23,7 @@ foreach($_FILES['profileImage']['name'] as $key => $file)
 
     $imageType = pathinfo($imgName, PATHINFO_EXTENSION);
     if(!$image->isValidExtension($imageType)) {
-        echo "Nije dobra extenzija slike";
+        $_SESSION['imageErrors'][] = "Nije dobra extenzija slike";
         continue;
     }
 
@@ -27,7 +32,7 @@ foreach($_FILES['profileImage']['name'] as $key => $file)
 
     list($width, $height) = getimagesize($tmpName);
     if(!$image->isValidProportion($width, $height)) {
-        echo "Slika je presiroka ili previsoka!";
+        $_SESSION['imageErrors'][] = "Slika je presiroka ili previsoka!";
         continue;
     }
 
@@ -41,6 +46,6 @@ foreach($_FILES['profileImage']['name'] as $key => $file)
 
 }
 
-
+header("Location: images.php");
 
 
