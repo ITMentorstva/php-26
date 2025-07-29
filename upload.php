@@ -4,26 +4,43 @@ require_once "models/Images.php";
 
 $image = new Images();
 
-$imageSize = $_FILES['profileImage']['size'];
+foreach($_FILES['profileImage']['name'] as $key => $file)
+{
 
-if(!$image->isValidSize($imageSize)) {
-    die("Slika je prevelika!");
+    $imageSize = $_FILES['profileImage']['size'][$key];
+
+    if(!$image->isValidSize($imageSize)) {
+        echo "Slika je prevelika!";
+        continue;
+    }
+
+    $imgName = $_FILES['profileImage']['name'][$key];
+
+    $imageType = pathinfo($imgName, PATHINFO_EXTENSION);
+    if(!$image->isValidExtension($imageType)) {
+        echo "Nije dobra extenzija slike";
+        continue;
+    }
+
+
+    $tmpName = $_FILES['profileImage']['tmp_name'][$key];
+
+    list($width, $height) = getimagesize($tmpName);
+    if(!$image->isValidProportion($width, $height)) {
+        echo "Slika je presiroka ili previsoka!";
+        continue;
+    }
+
+    $randomName = $image->generateRandomName('jpg');
+
+    if( !is_dir('./uploads') ) {
+        mkdir('./uploads', 0755, true);
+    }
+
+    $image->upload($tmpName, $randomName, "uploads");
+
 }
 
-$imageType = pathinfo($_FILES['profileImage']['name'], PATHINFO_EXTENSION);
-if(!$image->isValidExtension($imageType)) {
-    die("Nije dobra extenzija slike");
-}
 
-list($width, $height) = getimagesize($_FILES['profileImage']['tmp_name']);
-if(!$image->isValidProportion($width, $height)) {
-    die("Slika je presiroka ili previsoka!");
-}
 
-$randomName = $image->generateRandomName('jpg');
 
-if( !is_dir('./uploads') ) {
-    mkdir('./uploads', 0755, true);
-}
-
-$image->upload($_FILES['profileImage']['tmp_name'], $randomName, "uploads");
